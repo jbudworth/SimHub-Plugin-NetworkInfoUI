@@ -1,0 +1,49 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <AssemblyName>SimHub.Plugin.NetworkInfoUI</AssemblyName>
+    <RootNamespace>SimHub.Plugin.NetworkInfoUI</RootNamespace>
+    <LangVersion>latest</LangVersion>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <Platforms>AnyCPU;x64;x86</Platforms>
+    <!--
+      Needed to compile the settings-screen XAML (SettingsControl.xaml) and
+      pull in PresentationFramework/PresentationCore/WindowsBase. Supported
+      for net48 with the SDK-style project format, not just net5.0-windows+.
+    -->
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!--
+      Update this to match where SimHub is installed on your machine.
+      This is where SimHub.Plugins.dll and GameReaderCommon.dll live,
+      and it's also where the built plugin DLL gets copied to after
+      each build (see the target at the bottom of this file).
+    -->
+    <SimHubInstallDir>C:\Program Files (x86)\SimHub</SimHubInstallDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="SimHub.Plugins">
+      <HintPath>$(SimHubInstallDir)\SimHub.Plugins.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="GameReaderCommon">
+      <HintPath>$(SimHubInstallDir)\GameReaderCommon.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <!--
+    Copies the built DLL straight into SimHub's install folder so you can
+    just rebuild and restart SimHub to pick up changes. If Visual Studio
+    doesn't have write access to Program Files, either run VS as
+    administrator or remove this target and copy the DLL manually.
+  -->
+  <Target Name="CopyToSimHub" AfterTargets="Build">
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(SimHubInstallDir)" SkipUnchangedFiles="true" />
+  </Target>
+
+</Project>
