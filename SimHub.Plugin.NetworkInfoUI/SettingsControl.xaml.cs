@@ -38,6 +38,14 @@ namespace SimHub.Plugin.NetworkInfo
             _uiRefreshTimer.Tick += (s, e) => RefreshStatusGrid();
             _uiRefreshTimer.Start();
 
+            // Unloaded fires every time the user switches to another SimHub
+            // page, and the same control instance may be shown again later -
+            // so restart on Loaded rather than stopping permanently.
+            Loaded += (s, e) =>
+            {
+                RefreshStatusGrid();
+                _uiRefreshTimer.Start();
+            };
             Unloaded += (s, e) => _uiRefreshTimer.Stop();
         }
 

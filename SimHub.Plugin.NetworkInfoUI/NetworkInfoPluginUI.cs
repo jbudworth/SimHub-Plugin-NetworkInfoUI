@@ -60,7 +60,7 @@ namespace SimHub.Plugin.NetworkInfo
             PluginManager = pluginManager;
 
             _settings = this.ReadCommonSettings<Settings>("GeneralSettings", () => new Settings());
-            if (_settings.RefreshIntervalSeconds < 1) _settings.RefreshIntervalSeconds = 1;
+            _settings.RefreshIntervalSeconds = ClampRefreshInterval(_settings.RefreshIntervalSeconds);
 
             this.AttachDelegate("NetworkInfoPluginUI.Hostname", () => _hostname);
 
@@ -85,13 +85,20 @@ namespace SimHub.Plugin.NetworkInfo
             UpdateLocalInfo();
         }
 
+        // 1-30s, matching the settings screen's slider and the README.
+        private static int ClampRefreshInterval(int seconds)
+        {
+            if (seconds < 1) return 1;
+            if (seconds > 30) return 30;
+            return seconds;
+        }
+
         // Called by the settings screen when the user changes the refresh
-        // interval and clicks Save. Clamped to a sane 1-60s range, persisted,
-        // and applied to the running timer immediately (no restart needed).
+        // interval and clicks Save. Clamped, persisted, and applied to the
+        // running timer immediately (no restart needed).
         public void SetRefreshIntervalSeconds(int seconds)
         {
-            if (seconds < 1) seconds = 1;
-            if (seconds > 60) seconds = 60;
+            seconds = ClampRefreshInterval(seconds);
 
             _settings.RefreshIntervalSeconds = seconds;
             this.SaveCommonSettings("GeneralSettings", _settings);
@@ -171,7 +178,15 @@ namespace SimHub.Plugin.NetworkInfo
                 lock (_statusLock)
                 {
                     _wifiIP = "Error";
+                    _wifiNetmask = "";
+                    _wifiGateway = "";
+                    _wifiDhcp = "";
+
                     _ethernetIP = "Error";
+                    _ethernetNetmask = "";
+                    _ethernetGateway = "";
+                    _ethernetDhcp = "";
+
                     _allIPs = "Error: " + ex.Message;
                 }
             }
